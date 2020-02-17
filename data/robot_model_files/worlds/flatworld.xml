@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- test of siding on low-friction surfaces with different meshing resolutions- high resolutions lead to some extra friction artifacts -->
+<world>
+  <terrain file="terrains/plane.off"  translation="0 0 0" />
+    <simulation>
+  </simulation>
+</world>
+
