@@ -110,10 +110,10 @@ def opt_error_fun(est_input, *args):
     fun_list = np.array([])
     for i in range(len(Tlink_set)):
         Toct2needle_est = se3.mul(se3.mul(se3.inv(est_Toct), Tlink_set[i]), est_Tneedle)
-        fun_list = np.append(fun_list, np.absolute(np.multiply(se3.error(Tneedle2oct_icp[i],
-                                                                         se3.inv(Toct2needle_est))[0:3], 1)))
-        fun_list = np.append(fun_list, np.absolute(np.multiply(se3.error(Tneedle2oct_icp[i],
-                                                                         se3.inv(Toct2needle_est))[3:6], 1000)))
+        fun_list = np.append(fun_list, np.absolute(np.multiply(se3.error(se3.inv(Tneedle2oct_icp[i]),
+                                                                         Toct2needle_est)[0:3], 1)))
+        fun_list = np.append(fun_list, np.absolute(np.multiply(se3.error(se3.inv(Tneedle2oct_icp[i]),
+                                                                         Toct2needle_est)[3:6], 1000)))
     return fun_list
 
 
