@@ -103,17 +103,24 @@ def opt_error_fun(est_input, *args):
     :param args: {tuple} -- the set of tranfermation of Tlink and ICP transformation matrix
     :return: error: {float} -- the error between the true transformation and estimated transformation
     """
-    est_Toct = (so3.from_rpy(est_input[0:3]), est_input[3:6])
-    est_Tneedle = (so3.from_rpy(est_input[6:9]), est_input[9:12])
+    Roct = so3.from_rpy(est_input[0:3])
+    toct = est_input[3:6]
+    Rn = so3.from_rpy(est_input[6:9])
+    tn = est_input[9:12]
     Tlink_set = args[0]
     Tneedle2oct_icp = args[1]
     fun_list = np.array([])
     for i in range(len(Tlink_set)):
-        Toct2needle_est = se3.mul(se3.mul(se3.inv(est_Toct), Tlink_set[i]), est_Tneedle)
-        fun_list = np.append(fun_list, np.absolute(np.multiply(se3.error(se3.inv(Tneedle2oct_icp[i]),
-                                                                         Toct2needle_est)[0:3], 1)))
-        fun_list = np.append(fun_list, np.absolute(np.multiply(se3.error(se3.inv(Tneedle2oct_icp[i]),
-                                                                         Toct2needle_est)[3:6], 1000)))
+        fun_list = np.append(fun_list, np.multiply(so3.error(so3.inv(Tneedle2oct_icp[i][0]),
+                                                             so3.mul(so3.mul(so3.inv(Roct), Tlink_set[i][0]), Rn)), 1))
+        fun_list = np.append(fun_list,
+                             np.multiply(vectorops.sub(vectorops.sub([0., 0., 0.],
+                                                                     so3.apply(so3.inv(Tneedle2oct_icp[i][0]),
+                                                                               Tneedle2oct_icp[i][1])),
+                                                       so3.apply(so3.inv(Roct),
+                                                                 vectorops.add(vectorops.sub(Tlink_set[i][1], toct),
+                                                                               so3.apply(Tlink_set[i][0], tn)))), 1000))
+
     return fun_list
 
 
