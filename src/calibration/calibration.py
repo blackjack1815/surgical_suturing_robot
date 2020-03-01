@@ -10,6 +10,7 @@ from scipy.optimize import root
 import copy
 import time
 import random
+import os
 
 
 def redraw_pcd(pcd_pair, Toct_needle):
@@ -39,7 +40,7 @@ def trans_all2needle(Tlink_set, Toct, Tneedle, pcd_list):
     :return: None
     """
     pcd_needle_list = []
-    pcd_t = copy.deepcopy(pcd_list[6][1])
+    pcd_t = copy.deepcopy(pcd_list[0][1])
     pcd_t.paint_uniform_color([0, 0.651, 0.929])
     pcd_needle_list.append(pcd_t)
     mesh_frame = create_mesh_coordinate_frame(0.0006, [0, 0, 0])
@@ -213,7 +214,7 @@ class Calibration:
             Trans2World = self.robot.link('link_6').getTransform()
             self.Tlink_set.append(Trans2World)
 
-    def needle2oct_icp(self):
+    def needle2oct_icp(self, thres_t, thres_s):
         """
 
         :return: None
@@ -223,17 +224,18 @@ class Calibration:
             pcd_s = read_point_cloud("../../data/point_clouds/source_point_clouds/" + self.serial_num +
                                      "/cropped_OCT_config_" + str(i + 1) + ".ply")
             pcd_s.points = Vector3dVector(np.multiply(np.asarray(pcd_s.points), 1e-3))
-            if i < 6:
+            if i < thres_t:
                 pcd_t = read_point_cloud("../../data/point_clouds/target_point_clouds/TF-1-cut.ply")
             else:
                 pcd_t = read_point_cloud("../../data/point_clouds/target_point_clouds/TF-1.ply")
             pcd_t.points = Vector3dVector(np.multiply(np.asarray(pcd_t.points), 1e-3))
             temp_rmse = 1.
             count = 0
-            while temp_rmse > 2.0e-5:
+            termination_threshold = 2.0e-5
+            while temp_rmse > termination_threshold:
                 print("ICP implementation is in " + str(i+1) + "th point clouds.")
                 random.seed(count * 5 + 7 - count / 3)
-                if i > 5:
+                if i > thres_s:
                     trans_init = np.asarray(se3.homogeneous((
                         so3.from_rpy([random.uniform(-0.5 * np.pi, 0.5 * np.pi) for kk in range(3)]),
                         [random.uniform(-5. * 1e-3, 5. * 1e-3) for kk in range(3)])))
@@ -252,9 +254,13 @@ class Calibration:
                                              TransformationEstimationPointToPoint(),
                                              ICPConvergenceCriteria(max_iteration=100, relative_rmse=1e-15,
                                                                     relative_fitness=1e-15))
+                # ***DEBUG*** #
+                # draw_registration_result(modified_pcd_s, pcd_t, reg_p2p_2.transformation)
                 print("The RMSE is: ", reg_p2p_2.inlier_rmse)
                 temp_rmse = reg_p2p_2.inlier_rmse
                 count += 1
+                if count == 15:
+                    termination_threshold = 2.5e-5
             trans = se3.from_homogeneous(reg_p2p_2.transformation)
             self.trans_list.append(trans)
             point_oct = []
@@ -265,13 +271,12 @@ class Calibration:
             pcd_t_copy.points = Vector3dVector(np.multiply(np.asarray(pcd_t_copy.points), 1e-3))
             pcd_p.points = Vector3dVector(point_oct)
             # ***DEBUG*** #
-            # draw_registration_result(pcd_s_copy, pcd_t_copy, se3.homogeneous(trans))
+            draw_registration_result(pcd_s_copy, pcd_t_copy, se3.homogeneous(trans))
             self.pcd_list.append([pcd_s_copy, pcd_t_copy])
 
-    def optimization(self, penalty_y):
+    def optimization(self):
         """
 
-        :param penalty_y {float} penalize the rotation y axis during optimization
         :return: None
         """
         time_stamp = time.time()
@@ -283,8 +288,8 @@ class Calibration:
                         [random.uniform(-2 * np.pi, 2 * np.pi) for i in range(3)] + \
                         [random.uniform(-0.2, 0.2) for i in range(3)]
             print("We will start " + str(k + 1) + "th minimize!")
-            res = root(opt_error_fun_penalize, np.array(est_input),
-                       args=(self.Tlink_set, self.trans_list, penalty_y), method='lm',
+            res = root(opt_error_fun, np.array(est_input),
+                       args=(self.Tlink_set, self.trans_list), method='lm',
                        options={})
             print("The reason for termination: \n", res.message, "\nAnd the number of the iterations are: ", res.nfev)
             error = np.sum(np.absolute(res.fun))
@@ -300,6 +305,7 @@ class Calibration:
         print("The optimized T_needle_end is: ", (self.min_res.x[6:9], self.min_res.x[9:12]))
         print("And the matrix form is: \n",
               np.array(se3.homogeneous((so3.from_rpy(self.min_res.x[6:9]), self.min_res.x[9:12]))))
+        os.makedirs("../../data/suture_experiment/calibration_result_files/" + self.serial_num + "/", exist_ok=True)
         np.save("../../data/suture_experiment/calibration_result_files/" + self.serial_num +
                 "/calibration_result.npy", self.min_res.x, allow_pickle=True)
         vis.spin(float('inf'))
@@ -359,26 +365,36 @@ class Calibration:
         print("The squared rotation error list is:\n ", np.sqrt(rot_error_list), "\nAnd the its RMSE is ", rmse_rot)
         print("The mean error in three rotation vectors is: ", np.mean(rot_error_mat, axis=0))
         np.save("../../data/suture_experiment/calibration_result_files/" + self.serial_num +
-                "/calibration_error.npy", np.array([rmse_trans, rmse_rot]), allow_pickle=True)
+                "/calibration_error_rmse.npy", np.array([rmse_trans, rmse_rot]), allow_pickle=True)
+        np.save("../../data/suture_experiment/calibration_result_files/" + self.serial_num +
+                "/calibration_error_list.npy", np.array([np.sqrt(trans_error_list),
+                                                         np.sqrt(rot_error_list)]), allow_pickle=True)
+        np.save("../../data/suture_experiment/calibration_result_files/" + self.serial_num +
+                "/calibration_error_mat.npy", np.array([np.mean(trans_error_mat, axis=0),
+                                                        np.mean(rot_error_mat, axis=0)]), allow_pickle=True)
         trans_all2needle(self.Tlink_set, Toct, Tneedle, self.pcd_list)
 
-    def run_calibration(self, penalty_y):
+    def run_calibration(self, thres_t, thres_s):
         """
 
-        :param penalty_y {float} penalize the rotation y axis during optimization
         :return: None
         """
         self.sample_config()
         self.link_transform()
-        self.needle2oct_icp()
-        self.optimization(penalty_y)
+        self.needle2oct_icp(thres_t, thres_s)
+        self.optimization()
         self.error_analysis()
 
 
 if __name__ == "__main__":
     robot_filename = "../../data/robot_model_files"
-    serial_num = "190911A"
-    penaly_rotation_y = 0.1
+    serial_num = "200228B"
     num_pcd = 9
     calibration = Calibration(robot_filename, serial_num, num_pcd)
-    calibration.run_calibration(penaly_rotation_y)
+    # calibration.run_calibration(2, 1)
+    calibration.run_calibration(6, 5)
+
+    # trans_array = np.asarray(calibration.trans_list)
+    # print(calibration.trans_list)
+    # print(trans_array)
+    # np.save("../../data/suture_experiment/standard_trans_list/trans_array.npy", trans_array, allow_pickle=True)

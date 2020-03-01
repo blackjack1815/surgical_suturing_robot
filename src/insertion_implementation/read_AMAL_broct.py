@@ -1,12 +1,13 @@
 import numpy as np
 import imageio
 
+import os
+
 from PyBROCT.io.reader import scans
 
 
 def save_ideal_png(ideal_cscan, serial_num):
     """
-
     :param ideal_cscan: {int} -- the index of the ideal C-scan
     :param serial_num: {string} -- the serial number of needle insertion
     :return: None
@@ -19,12 +20,13 @@ def save_ideal_png(ideal_cscan, serial_num):
         bscan = (bscan - 54) / (100 - 54)
         bscan = np.clip(bscan, 0, 1)
         bscan = (255 * bscan).astype(np.uint8)
+        os.makedirs("../../data/suture_experiment/suture_result_broct_files/AMAL_png/" +
+                    serial_num + "/", exist_ok=True)
         imageio.imwrite('../../data/suture_experiment/suture_result_broct_files/AMAL_png/' +
-                        serial_num + '/' + str(ideal_cscan) + '_bscan.png', bscan, format='png')
+                        serial_num + '/bscan.png', bscan, format='png')
 
 
 if __name__ == "__main__":
-    serial_num = "190911A"
+    serial_num = "200229L"
     ideal_cscan = 400
     save_ideal_png(ideal_cscan, serial_num)
-

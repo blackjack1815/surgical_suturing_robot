@@ -20,14 +20,14 @@ class ManualSegmentation:
         self.dim_arr = np.array(pd.read_csv("../../data/oct_volume_calibration/" +
                                             self.serial_num + "/dimension.csv", header=None))
 
-    def manual_segmentation(self, index):
+    def manual_segmentation(self, idx):
         """
 
-        :param index: {int} -- the index of the .broct file
+        :param idx: {int} -- the index of the .broct file
         :return: None
         """
-        for (index, data) in scans("../../data/oct_volume_calibration/" +
-                                   self.serial_num + "/config" + str(index) + ".broct"):
+        for data in scans("../../data/oct_volume_calibration/" +
+                                   self.serial_num + "/config" + str(idx) + ".broct"):
             volume = data['volume']
             # volume = volume[:, :, 85:]
             volume = volume[:, :, :]
@@ -71,7 +71,7 @@ class ManualSegmentation:
 
 
 if __name__ == '__main__':
-    serial_num = "190911A"
+    serial_num = "200222A"
     threshold = 65
     num = 9
     segmentation = ManualSegmentation(serial_num, threshold, num)

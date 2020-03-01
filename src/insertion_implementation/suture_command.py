@@ -87,6 +87,7 @@ class PathGenerator:
         self.robot = self.world.robot(0)
         self.suture_center = np.array(pd.read_csv("../../data/suture_experiment/suture_center_files/" +
                                                   serial_num + "_suture_center.csv", header=None))
+        print(self.suture_center)
         self.calibration_res = np.load("../../data/suture_experiment/calibration_result_files/" +
                                   serial_num + "/calibration_result.npy")
         self.Toct = (so3.from_rpy(self.calibration_res[0:3]), self.calibration_res[3:6])
@@ -112,7 +113,8 @@ class PathGenerator:
                      -self.radius * np.sin((240 * np.pi) / 180.), 0.0]]
         center = [(self.dim_arr[0][0] * 1e-3) -
                   ((self.suture_center[0, 0] / self.dim_arr[1][0]) * self.dim_arr[0][0] * 1e-3),
-                  (self.suture_center[0, 1] / self.dim_arr[1][1]) * self.dim_arr[0][1] * 1e-3]
+                  (self.suture_center[1, 0] / self.dim_arr[1][1]) * self.dim_arr[0][1] * 1e-3]
+        print("The center is: ", (self.suture_center[2, 0]/self.dim_arr[1][2]) * 1e-3)
         for i in range(0, self.rotation * 10):
             current_angle = i * 0.1
             pos_x_0 = center[0] - self.radius * np.cos((current_angle * np.pi) / 180.)
@@ -121,9 +123,9 @@ class PathGenerator:
             pos_y_1 = center[1] + self.radius * np.sin(((current_angle - 120) * np.pi) / 180.)
             pos_x_2 = center[0] - self.radius * np.cos(((current_angle - 240) * np.pi) / 180.)
             pos_y_2 = center[1] + self.radius * np.sin(((current_angle - 240) * np.pi) / 180.)
-            world_pos = [se3.apply(self.Toct, [pos_x_0, pos_y_0, self.suture_center[0, 2] * 1e-3]),
-                         se3.apply(self.Toct, [pos_x_1, pos_y_1, self.suture_center[0, 2] * 1e-3]),
-                         se3.apply(self.Toct, [pos_x_2, pos_y_2, self.suture_center[0, 2] * 1e-3])]
+            world_pos = [se3.apply(self.Toct, [pos_x_0, pos_y_0, (self.suture_center[2, 0]/self.dim_arr[1][2]) * 1e-2]),
+                         se3.apply(self.Toct, [pos_x_1, pos_y_1, (self.suture_center[2, 0]/self.dim_arr[1][2]) * 1e-2]),
+                         se3.apply(self.Toct, [pos_x_2, pos_y_2, (self.suture_center[2, 0]/self.dim_arr[1][2]) * 1e-2])]
             q = solve_ik(self.robot.link('tool0'), localpos, world_pos)
             config_list.append(q)
         return config_list
@@ -131,7 +133,7 @@ class PathGenerator:
 
 if __name__ == '__main__':
     robot_filename = "../../data/robot_model_files"
-    serial_num = "190911A"
+    serial_num = "200229L"
     rotation = 150
     radius = 3.961 * 1e-3
     path = PathGenerator(robot_filename, serial_num, rotation, radius)
@@ -139,5 +141,5 @@ if __name__ == '__main__':
     # config_list = config_list[::-1]
     print("Suturing path generated.")
     time.sleep(5.)
-    controller = SutureController(config_list, '192.168.1.31')
+    controller = SutureController(config_list, '192.168.1.178')
     controller.start()

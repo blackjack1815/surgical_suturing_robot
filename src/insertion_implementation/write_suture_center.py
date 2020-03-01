@@ -5,7 +5,6 @@ from scipy.ndimage import gaussian_filter1d
 
 def reverse(line):
     """
-
     :param line: {numpy.array} -- the 2d line need to be flipped only on column 1
     :return: line: {numpy.array} -- already flipped line
     """
@@ -21,7 +20,6 @@ def reverse(line):
 
 def rotate_line(line):
     """
-
     :param line: {numpy.array} -- the array of points list
     :return: rotated_line: {numpy.array} -- the array of points list
     :return: angle: {float} -- the rotation angle
@@ -41,7 +39,6 @@ def rotate_line(line):
 
 def cal_gradient(line, dis):
     """
-
     :param line: {numpy.array} -- the array of points in the line
     :param dis: {int} -- the distance to calculate the gradient
     :return:
@@ -66,7 +63,6 @@ def cal_gradient(line, dis):
 
 def lowest_ind(line):
     """
-
     :param line: {numpy.array} -- the 2d line need to be found lowest point
     :return: index: {int} -- the index of the lowest point
     """
@@ -81,7 +77,6 @@ def lowest_ind(line):
 
 def rotate_back(line, angle, origin):
     """
-
     :param line: {numpy.array} -- the array of points list
     :param angle: {float} -- the rotation angle
     :param origin: {numpy.array} -- the origin of the rotation
@@ -99,7 +94,6 @@ def rotate_back(line, angle, origin):
 
 def find_wound(grad_lis, line, dis):
     """
-
     :param grad_lis: {numpy.array} -- the array of gradient list
     :param line: {numpy.array} -- the 2d line need to be found wound position
     :param dis:{int} -- the distance to calculate gradient
@@ -131,7 +125,6 @@ def find_wound(grad_lis, line, dis):
 
 def cal_distance(mod_line, start_p, end_p, pix_x, pix_h):
     """
-
     :param mod_line: {numpy.array} -- the array of points that draw the top of the wound
     :param start_p: {int} -- the index of the start point
     :param end_p: {int} -- the index of the end of point
@@ -151,7 +144,6 @@ def cal_distance(mod_line, start_p, end_p, pix_x, pix_h):
 
 def find_origin(down_p_pix, right_p_pix, rad, pix_x, pix_h):
     """
-
     :param down_p_pix: {np.array} -- the deepest point of the suture path
     :param right_p_pix: {np.array} -- the bite point of the suture path at the first part of suture
     :param rad: {float} -- the number of pixels of the radius
@@ -213,11 +205,11 @@ def write_suture_center(serial_num, ideal_cscan):
     left_bitepoint = mod_line[low_p - left_bite_pix]
     right_bitepoint = mod_line[low_p + right_bite_pix]
     suture_origin = find_origin(left_bitepoint, right_bitepoint, radius, pix_x, pix_h)
-    np.savetxt("../../data/suture_center_files/" + serial_num + "_suture_center.csv",
-               np.array([suture_origin[0], suture_origin[1], ideal_cscan]))
+    np.savetxt("../../data/suture_experiment/suture_center_files/" + serial_num + "_suture_center.csv",
+               np.array([suture_origin[0], -suture_origin[1], ideal_cscan]))
 
 
 if __name__ == "__main__":
-    serial_num = '190911A'
+    serial_num = '200229L'
     ideal_scsan = 400
     write_suture_center(serial_num, ideal_scsan)

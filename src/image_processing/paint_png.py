@@ -2,6 +2,7 @@ import numpy as np
 import pandas as pd
 import cv2 as cv
 from tqdm import tqdm
+import os
 
 
 # This function only generate suture path on the direction of Bscan
@@ -77,13 +78,15 @@ def paint_bscan(bscan, serial_num, idx=None, circle_1=None, circle_2=None, circl
                 # bscan_color[int(circle_3[i][1] - 1), int(circle_3[i][0]) - 1] = color_3
                 # bscan_color[int(circle_3[i][1] + 1), int(circle_3[i][0]) - 1] = color_3
                 # bscan_color[int(circle_3[i][1] - 1), int(circle_3[i][0]) + 1] = color_3
-    cv.imwrite("../../data/suture_experiment/painted_png_data/" + str(idx) + "_painted.png", bscan_color)
+    os.makedirs("../../data/suture_experiment/painted_png_data/" + serial_num + "/", exist_ok=True)
+    cv.imwrite("../../data/suture_experiment/painted_png_data/" +
+               serial_num + '/' + str(idx) + "_painted.png", bscan_color)
 
 
 def gen_path(center, c_idx, start_Z, tip_rad, rot_angle, pix_x, pix_h, pix_z, serial_num):
-    circle_tr_in = np.array(draw_part_circle_3d(tip_rad - 0.392, center, start_Z, rot_angle, pix_x, pix_h, pix_z))
+    circle_tr_in = np.array(draw_part_circle_3d(tip_rad - 0.340, center, start_Z, rot_angle, pix_x, pix_h, pix_z))
     circle_tr_ce = np.array(draw_part_circle_3d(tip_rad, center, start_Z, rot_angle, pix_x, pix_h, pix_z))
-    circle_tr_ou = np.array(draw_part_circle_3d(tip_rad + 0.055, center, start_Z, rot_angle, pix_x, pix_h, pix_z))
+    circle_tr_ou = np.array(draw_part_circle_3d(tip_rad + 0.107, center, start_Z, rot_angle, pix_x, pix_h, pix_z))
     line = np.array(pd.read_csv("../../data/suture_experiment/segmentation_line_files/" + serial_num + "_line.csv",
                                 header=None))
     bscan = cv.imread('../../data/suture_experiment/png_data/' +
@@ -93,19 +96,19 @@ def gen_path(center, c_idx, start_Z, tip_rad, rot_angle, pix_x, pix_h, pix_z, se
 
 
 if __name__ == "__main__":
-    serial_num = '190911A'
+    serial_num = '200229L'
     dim_arr = np.array(pd.read_csv("../../data/oct_volume_calibration/" +
                                    serial_num + "/dimension.csv", header=None))
     center_coordinate = np.array(pd.read_csv("../../data/suture_experiment/suture_center_files/" +
                                              serial_num + "_suture_center.csv", header=None))
     pix_x = dim_arr[0][0] / dim_arr[1][0]
     pix_h = dim_arr[0][1] / dim_arr[1][1]
-    pix_z = 2. / 50
+    pix_z = dim_arr[0][2] / dim_arr[1][2]
     center = np.array([(center_coordinate[0, 0]/dim_arr[1][0]) * dim_arr[0][0],
-                       (center_coordinate[0, 1]/dim_arr[1][1]) * dim_arr[0][1]])
-    suture_rad = 4.13
-    c_idx = 18
+                       (center_coordinate[1, 0]/dim_arr[1][1]) * dim_arr[0][1]])
+    suture_rad = 4.078
+    c_idx = 0
     start_Z = 5.
     rot_angle = 180
-    for i in tqdm(range(0, 9)):
+    for i in tqdm(range(386, 429)):
         gen_path(center, c_idx + i, start_Z, suture_rad, rot_angle, pix_x, pix_h, pix_z, serial_num)
