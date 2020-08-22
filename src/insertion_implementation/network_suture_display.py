@@ -36,7 +36,7 @@ def draw_part_circle_3d(radius, center, start_Z, rot_angle, start_angle, rot_x, 
 
 
 def process(volume):
-    serial_num = '200229L'
+    serial_num = '200305O'
     center_coordinate = np.array(pd.read_csv("../../data/suture_experiment/suture_center_files/" +
                                              serial_num + "_suture_center.csv", header=None))
     dim_arr = np.array(pd.read_csv("../../data/oct_volume_calibration/" +

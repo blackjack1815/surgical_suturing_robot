@@ -249,6 +249,9 @@ class Calibration:
                                            TransformationEstimationPointToPoint(),
                                            ICPConvergenceCriteria(max_iteration=300, relative_rmse=1e-15,
                                                                   relative_fitness=1e-15))
+                # ***DEBUG*** #
+                # draw_registration_result(pcd_s, pcd_t, reg_p2p.transformation)
+
                 modified_pcd_s = duplicate_part_pcd(reg_p2p.transformation, pcd_s, -0.2 * 1e-3, 0.0 * 1e-3, 30)
                 reg_p2p_2 = registration_icp(modified_pcd_s, pcd_t, threshold, reg_p2p.transformation,
                                              TransformationEstimationPointToPoint(),
@@ -256,6 +259,7 @@ class Calibration:
                                                                     relative_fitness=1e-15))
                 # ***DEBUG*** #
                 # draw_registration_result(modified_pcd_s, pcd_t, reg_p2p_2.transformation)
+
                 print("The RMSE is: ", reg_p2p_2.inlier_rmse)
                 temp_rmse = reg_p2p_2.inlier_rmse
                 count += 1
@@ -271,7 +275,8 @@ class Calibration:
             pcd_t_copy.points = Vector3dVector(np.multiply(np.asarray(pcd_t_copy.points), 1e-3))
             pcd_p.points = Vector3dVector(point_oct)
             # ***DEBUG*** #
-            draw_registration_result(pcd_s_copy, pcd_t_copy, se3.homogeneous(trans))
+            # draw_registration_result(pcd_s_copy, pcd_t_copy, se3.homogeneous(trans))
+
             self.pcd_list.append([pcd_s_copy, pcd_t_copy])
 
     def optimization(self):
@@ -305,9 +310,9 @@ class Calibration:
         print("The optimized T_needle_end is: ", (self.min_res.x[6:9], self.min_res.x[9:12]))
         print("And the matrix form is: \n",
               np.array(se3.homogeneous((so3.from_rpy(self.min_res.x[6:9]), self.min_res.x[9:12]))))
-        os.makedirs("../../data/suture_experiment/calibration_result_files/" + self.serial_num + "/", exist_ok=True)
-        np.save("../../data/suture_experiment/calibration_result_files/" + self.serial_num +
-                "/calibration_result.npy", self.min_res.x, allow_pickle=True)
+        # os.makedirs("../../data/suture_experiment/calibration_result_files/" + self.serial_num + "/", exist_ok=True)
+        # np.save("../../data/suture_experiment/calibration_result_files/" + self.serial_num +
+        #         "/calibration_result.npy", self.min_res.x, allow_pickle=True)
         vis.spin(float('inf'))
 
         vis.clear()
@@ -364,14 +369,14 @@ class Calibration:
         print("The mean error in XYZ directions is: ", np.mean(trans_error_mat, axis=0))
         print("The squared rotation error list is:\n ", np.sqrt(rot_error_list), "\nAnd the its RMSE is ", rmse_rot)
         print("The mean error in three rotation vectors is: ", np.mean(rot_error_mat, axis=0))
-        np.save("../../data/suture_experiment/calibration_result_files/" + self.serial_num +
-                "/calibration_error_rmse.npy", np.array([rmse_trans, rmse_rot]), allow_pickle=True)
-        np.save("../../data/suture_experiment/calibration_result_files/" + self.serial_num +
-                "/calibration_error_list.npy", np.array([np.sqrt(trans_error_list),
-                                                         np.sqrt(rot_error_list)]), allow_pickle=True)
-        np.save("../../data/suture_experiment/calibration_result_files/" + self.serial_num +
-                "/calibration_error_mat.npy", np.array([np.mean(trans_error_mat, axis=0),
-                                                        np.mean(rot_error_mat, axis=0)]), allow_pickle=True)
+        # np.save("../../data/suture_experiment/calibration_result_files/" + self.serial_num +
+        #         "/calibration_error_rmse.npy", np.array([rmse_trans, rmse_rot]), allow_pickle=True)
+        # np.save("../../data/suture_experiment/calibration_result_files/" + self.serial_num +
+        #         "/calibration_error_list.npy", np.array([np.sqrt(trans_error_list),
+        #                                                  np.sqrt(rot_error_list)]), allow_pickle=True)
+        # np.save("../../data/suture_experiment/calibration_result_files/" + self.serial_num +
+        #         "/calibration_error_mat.npy", np.array([np.mean(trans_error_mat, axis=0),
+        #                                                 np.mean(rot_error_mat, axis=0)]), allow_pickle=True)
         trans_all2needle(self.Tlink_set, Toct, Tneedle, self.pcd_list)
 
     def run_calibration(self, thres_t, thres_s):
@@ -388,7 +393,7 @@ class Calibration:
 
 if __name__ == "__main__":
     robot_filename = "../../data/robot_model_files"
-    serial_num = "200228B"
+    serial_num = "200305O"
     num_pcd = 9
     calibration = Calibration(robot_filename, serial_num, num_pcd)
     # calibration.run_calibration(2, 1)

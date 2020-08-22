@@ -27,6 +27,6 @@ def save_ideal_png(ideal_cscan, serial_num):
 
 
 if __name__ == "__main__":
-    serial_num = "200229L"
-    ideal_cscan = 400
+    serial_num = "200305O"
+    ideal_cscan = 250
     save_ideal_png(ideal_cscan, serial_num)

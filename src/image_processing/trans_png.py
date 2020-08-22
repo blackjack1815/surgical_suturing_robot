@@ -7,11 +7,11 @@ from PyBROCT.io.reader import scans
 
 
 if __name__ == '__main__':
-    serial_num = '200229L'
+    serial_num = '200305O'
     for data in scans("../../data/suture_experiment/suture_result_broct_files/suture/" + serial_num + "_suture.broct"):
         volume = data['volume']
-        idx = 386
-        for bscan in volume[386:429]:
+        idx = 222
+        for bscan in volume[222:256]:
             bscan = bscan[::-1, :]
             # white and black levels
             bscan = (bscan - 54) / (100 - 54)

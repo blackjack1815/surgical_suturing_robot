@@ -56,16 +56,17 @@ class AutomaticSegmentation:
             if index == 1:
                 brightest_pix = volume_sum.max()
             volume_sum = np.array(volume_sum * (100 / (brightest_pix - volume_sum.min())), dtype=np.uint8)
+
+            # ### DEBUG ###
+            cv.namedWindow('component', cv.WINDOW_NORMAL)
+            cv.imshow('component', volume_sum)
+            cv.waitKey(10)
+
             thres_map = cv.threshold(volume_sum, self.map_thres, 255, cv.THRESH_BINARY)[1]
             if index == 6:
                 thres_map = cv.morphologyEx(thres_map, cv.MORPH_CLOSE, np.ones((3, 3)))
             else:
                 thres_map = cv.morphologyEx(thres_map, cv.MORPH_CLOSE, np.ones((5, 5)))
-
-            # ### DEBUG ###
-            cv.namedWindow('component', cv.WINDOW_NORMAL)
-            cv.imshow('component', thres_map)
-            cv.waitKey(10)
 
             if self.clip_threshold_xz[index-1][1] == -1:
                 thres_map[:, :self.clip_threshold_xz[index-1][0]] = 0
@@ -162,7 +163,7 @@ class AutomaticSegmentation:
 
 if __name__ == '__main__':
     clip_threshold_xz = [[430, -1, 0],
-                         [220, -1, 0],
+                         [230, -1, 0],
                          [0, -1, 0],
                          [430, -1, 0],
                          [220, -1, 0],
@@ -180,6 +181,8 @@ if __name__ == '__main__':
                         [550, -90],
                         [550, -90]]
 
+    #230
+
     # clip_threshold_xz = [[250, -1, 0],
     #                      [50, -1, 0],
     #                      [550, 1, 0]]
@@ -187,7 +190,7 @@ if __name__ == '__main__':
     #                     [500, -1],
     #                     [500, -90]]
 
-    serial_num = "200228B"
+    serial_num = "190911A"
     threshold = 75
     map_threhold = 11
     num = 9

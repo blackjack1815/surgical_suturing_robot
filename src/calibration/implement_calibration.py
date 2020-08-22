@@ -6,7 +6,7 @@ import needle_segmentation_automatic as seg
 
 
 def main():
-    serial_num = "200229L"
+    serial_num = "200305O"
     controller = s0.RecordController(serial_num, '192.168.1.178')
     controller.start()
 

@@ -133,7 +133,7 @@ class PathGenerator:
 
 if __name__ == '__main__':
     robot_filename = "../../data/robot_model_files"
-    serial_num = "200229L"
+    serial_num = "200305O"
     rotation = 150
     radius = 3.961 * 1e-3
     path = PathGenerator(robot_filename, serial_num, rotation, radius)

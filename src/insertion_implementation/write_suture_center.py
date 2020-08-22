@@ -210,6 +210,6 @@ def write_suture_center(serial_num, ideal_cscan):
 
 
 if __name__ == "__main__":
-    serial_num = '200229L'
-    ideal_scsan = 400
+    serial_num = '200305O'
+    ideal_scsan = 250
     write_suture_center(serial_num, ideal_scsan)

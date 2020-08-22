@@ -96,7 +96,7 @@ def gen_path(center, c_idx, start_Z, tip_rad, rot_angle, pix_x, pix_h, pix_z, se
 
 
 if __name__ == "__main__":
-    serial_num = '200229L'
+    serial_num = '200305O'
     dim_arr = np.array(pd.read_csv("../../data/oct_volume_calibration/" +
                                    serial_num + "/dimension.csv", header=None))
     center_coordinate = np.array(pd.read_csv("../../data/suture_experiment/suture_center_files/" +
@@ -110,5 +110,5 @@ if __name__ == "__main__":
     c_idx = 0
     start_Z = 5.
     rot_angle = 180
-    for i in tqdm(range(386, 429)):
+    for i in tqdm(range(222, 256)):
         gen_path(center, c_idx + i, start_Z, suture_rad, rot_angle, pix_x, pix_h, pix_z, serial_num)
